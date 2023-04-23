@@ -108,7 +108,14 @@ const voteQuestion = async (req, res) => {
 
 const createQuestion = async (req, res = response) => {
   try {
+    if (!req.hCaptchaValid) {
+      return res.status(400).json({
+        message: "Error al verificar el captcha",
+      });
+    }
+
     const { title, body } = req.body;
+
     console.log(req.uid);
     const author = req.uid;
 

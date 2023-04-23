@@ -2,7 +2,13 @@ const express = require("express");
 const { dbConnection } = require("./db/config");
 const cors = require("cors");
 
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+dotenv.config({ path: envFile });
 
 const expressApp = express();
 //Base de datos

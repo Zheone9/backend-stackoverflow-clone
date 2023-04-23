@@ -8,12 +8,13 @@ const {
 const { questionValidationSchema } = require("../schemas/question");
 const { validateQuestion } = require("../middlewares/questionValidator");
 const { validarJWT } = require("../middlewares/validateToken");
+const { validateHcaptcha } = require("../middlewares/validateCaptcha");
 
 const router = Router();
 
 router.post(
   "/create",
-  [validarJWT, validateQuestion(questionValidationSchema)],
+  [validarJWT, validateHcaptcha, validateQuestion(questionValidationSchema)],
   createQuestion
 );
 router.get("/public", getAllQuestionsPublic);
