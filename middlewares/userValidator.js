@@ -6,11 +6,12 @@ const validateUser = (schema, omitUser = false) => async (req, res, next) => {
     } else {
       await schema.parseAsync(req.body);
     }
-
     return next();
   } catch (error) {
-    console.log(object);
-    return res.status(400).json(error);
+    console.log(error.errors[0]);
+    return res.status(400).json({
+      error: error.errors[0],
+    });
   }
 };
 

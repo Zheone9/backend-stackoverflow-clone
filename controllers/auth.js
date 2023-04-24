@@ -32,8 +32,10 @@ const createUser = async (req, res = response) => {
     const token = await generateToken(user.id, user.username);
 
     res.status(201).json({
+      payload: {
+        username: user.username,
+      },
       ok: true,
-      uid: user.id,
       token,
       msg: "user created",
     });
