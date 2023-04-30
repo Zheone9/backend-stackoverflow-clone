@@ -14,11 +14,8 @@ const validateHcaptcha = async (req, res, next) => {
       },
     });
 
-    if (response.data.success) {
-      req.hCaptchaValid = true;
-    } else {
-      req.hCaptchaValid = false;
-    }
+    req.hCaptchaValid = !!response.data.success;
+
   } catch (error) {
     req.hCaptchaValid = false;
     console.log("error", error);

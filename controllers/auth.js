@@ -29,14 +29,29 @@ const createUser = async (req, res = response) => {
     user.password = bcrypt.hashSync(password, salt);
 
     await user.save();
-    const token = await generateToken(user.id, user.username);
+    req.session.user = {
+      _id: user._id,
+      username: user.username,
+      reputation: user.reputation,
+    };
 
+    const token = await generateToken(user.id, user.username);
+    const cookieOptions = {
+      maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
+      secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
+      sameSite: 'strict', // Previene ataques CSRF (opcional)
+      httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
+    };
+
+    // Enviar JWT token como una cookie HTTPOnly
+    res.cookie('jwtToken', token, cookieOptions);
     res.status(201).json({
       payload: {
         username: user.username,
+        uid: user._id,
+        reputation: user.reputation,
       },
       ok: true,
-      token,
       msg: "user created",
     });
   } catch (error) {
@@ -71,15 +86,26 @@ const loginWithGoogle = async (req, res = response) => {
       await user.save();
     }
 
-    // Generar un token JWT para el usuario
+
+
     const token = await generateToken(user.id, user.username);
     // Enviar el token JWT al cliente
+    const cookieOptions = {
+      maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
+      secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
+      sameSite: 'strict', // Previene ataques CSRF (opcional)
+      httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
+    };
+
+    // Enviar JWT token como una cookie HTTPOnly
+    res.cookie('jwtToken', token, cookieOptions);
     res.json({
       payload: {
         username: user.username,
+        uid: user._id,
+        reputation: user.reputation,
       },
       ok: true,
-      token,
       msg: "login successful",
     });
   } catch (error) {
@@ -101,33 +127,63 @@ const loginUser = async (req, res = response) => {
         msg: "Usuario o contraseña incorrectos",
       });
     }
+    req.session.user = {
+      _id: user._id,
+      username: user.username,
+      reputation: user.reputation,
+    };
     const token = await generateToken(user.id, user.username);
     const username = user.username;
+
+    const cookieOptions = {
+      maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
+      secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
+      sameSite: 'strict', // Previene ataques CSRF (opcional)
+      httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
+    };
+
+    // Enviar JWT token como una cookie HTTPOnly
+    res.cookie('jwtToken', token, cookieOptions);
     res.json({
       payload: {
         username,
+        uid: user._id,
+        reputation: user.reputation,
       },
       ok: true,
-      token,
       msg: "login successful",
     });
   } catch (error) {
-    console.log(error),
+    console.log(error)
       res.status(500).json({
         ok: false,
         message: "Por favor hable con el administrador",
       });
   }
 };
+const logout=(req,res=Response)=>{
+  res.clearCookie('jwtToken');
+      res.status(200).json({ message: 'Logout successful' });
+
+
+}
+
 
 const renewToken = async (req, res = response) => {
   const { username, uid } = req;
   const token = await generateToken(uid, username);
-
+  const cookieOptions = {
+    maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
+    secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
+    sameSite: 'strict', // Previene ataques CSRF (opcional)
+    httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
+  };
+  res.cookie('jwtToken', token, cookieOptions);
   res.json({
-    ok: true,
-    token,
-  });
+    ok:true
+  })
+
+
 };
 
 module.exports = {
@@ -135,4 +191,6 @@ module.exports = {
   loginUser,
   renewToken,
   loginWithGoogle,
+  logout,
+
 };

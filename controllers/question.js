@@ -6,7 +6,7 @@ const getAllQuestions = async (req, res) => {
   try {
     const questions = await Question.find().populate(
       "author",
-      "reputation username -_id"
+      "reputation username"
     );
 
     const modifiedQuestions = questions.map((question) => {
@@ -31,7 +31,8 @@ const getAllQuestions = async (req, res) => {
       delete questionJSON.__v;
       questionJSON.uid = questionJSON._id;
       delete questionJSON._id;
-
+      questionJSON.author.uid = questionJSON.author._id;
+      delete questionJSON.author._id;
       return questionJSON;
     });
 
@@ -105,6 +106,27 @@ const voteQuestion = async (req, res) => {
     res.status(500).json({ message: "Error al votar la pregunta" });
   }
 };
+const deleteQuestion = async (req, res = reponse) => {
+  try {
+    const { uid } = req.params;
+    const authorId = req.uid;
+    const question = await Question.findById(uid);
+
+    if (question.author._id.toHexString() !== authorId) {
+      return res.status(401).json({ message: "Unathorized" });
+    }
+
+    await Question.findByIdAndDelete(uid);
+    await User.findByIdAndUpdate(
+      authorId,
+      { $pull: { questions: uid } },
+      { new: true }
+    );
+    res.status(200).json({ message: "Question deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete question" });
+  }
+};
 
 const createQuestion = async (req, res = response) => {
   try {
@@ -126,6 +148,7 @@ const createQuestion = async (req, res = response) => {
       body,
       author,
     });
+    newQuestion.voters.push({ _id: user._id, vote: 1 });
 
     await newQuestion.save();
     user.questions.push(newQuestion._id);
@@ -142,4 +165,5 @@ module.exports = {
   getAllQuestions,
   voteQuestion,
   getAllQuestionsPublic,
+  deleteQuestion,
 };
