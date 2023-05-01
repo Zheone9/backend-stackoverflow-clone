@@ -9,11 +9,11 @@ const userValidationSchema = z.object({
     .email("Not a valid email"),
   username: z
     .string()
-    .min(5, {
-      message: "Username must be 5 or more characters long",
+    .min(6, {
+      message: "Username must be 6 or more characters long",
     })
     .max(10, {
-      message: "Username must be 5 or fewer characters long",
+      message: "Username must be 10 or fewer characters long",
     }),
   password: z
     .string({
@@ -23,7 +23,7 @@ const userValidationSchema = z.object({
       message: "Password must be 5 or more characters long",
     })
     .max(15, {
-      message: "Password must be 5 or fewer characters long",
+      message: "Password must be 15 or fewer characters long",
     }),
 });
 

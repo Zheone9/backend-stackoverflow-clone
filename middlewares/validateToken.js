@@ -2,9 +2,7 @@ const { response } = require("express");
 const jwt = require("jsonwebtoken");
 
 const validarJWT = (req, res = response, next) => {
-  console.log(req.cookies)
   const token = req.cookies.jwtToken;
-
 
   if (!token) {
     console.log('No hay token')

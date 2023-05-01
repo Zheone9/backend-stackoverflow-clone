@@ -1,7 +1,8 @@
-const validateUser = (schema, omitUser = false) => async (req, res, next) => {
+const validateUser = (schema, omitEmail = false) => async (req, res, next) => {
   try {
-    if (omitUser) {
-      const schemaWithoutUser = schema.omit({ username: true });
+    console.log(req.body)
+    if (omitEmail) {
+      const schemaWithoutUser = schema.omit({ email: true });
       await schemaWithoutUser.parseAsync(req.body);
     } else {
       await schema.parseAsync(req.body);

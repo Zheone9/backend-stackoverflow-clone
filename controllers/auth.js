@@ -6,6 +6,7 @@ const { verifyGoogleIdToken } = require("../helpers/google/validateTokenId");
 
 const createUser = async (req, res = response) => {
   const { email, password, username } = req.body;
+  console.log(email,password,username)
   try {
     let user = await User.findOne({ email });
 
@@ -19,7 +20,7 @@ const createUser = async (req, res = response) => {
     if (user) {
       return res.status(400).json({
         ok: false,
-        message: "Un usuario ya eligió ese usuario",
+        message: "El nombre de usuario ya existe, elige otro.",
       });
     }
     user = new User(req.body);
@@ -29,11 +30,7 @@ const createUser = async (req, res = response) => {
     user.password = bcrypt.hashSync(password, salt);
 
     await user.save();
-    req.session.user = {
-      _id: user._id,
-      username: user.username,
-      reputation: user.reputation,
-    };
+
 
     const token = await generateToken(user.id, user.username);
     const cookieOptions = {
@@ -86,8 +83,6 @@ const loginWithGoogle = async (req, res = response) => {
       await user.save();
     }
 
-
-
     const token = await generateToken(user.id, user.username);
     // Enviar el token JWT al cliente
     const cookieOptions = {
@@ -99,6 +94,11 @@ const loginWithGoogle = async (req, res = response) => {
 
     // Enviar JWT token como una cookie HTTPOnly
     res.cookie('jwtToken', token, cookieOptions);
+    console.log({
+      username: user.username,
+      uid: user._id,
+      reputation: user.reputation,
+    })
     res.json({
       payload: {
         username: user.username,
@@ -116,43 +116,40 @@ const loginWithGoogle = async (req, res = response) => {
 };
 
 const loginUser = async (req, res = response) => {
-  const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
-    const validPassword = bcrypt.compareSync(password, user.password);
+    const { username, password } = req.body;
+    console.log(password)
+    const user = await User.findOne({ username });
 
-    if (!validPassword) {
-      return res.status(400).json({
-        ok: false,
-        msg: "Usuario o contraseña incorrectos",
+    if (!user) {
+      return res.status(400).json({message: 'Usuario o contraseña incorrectos'});
+    } else {
+      const validPassword = bcrypt.compareSync(password, user.password);
+      if (!validPassword) {
+        return res.status(400).json({
+          ok: false,
+          message: "Usuario o contraseña incorrectos",
+        });
+      }
+
+      const token = await generateToken(user.id, user.username);
+      const cookieOptions = {
+        maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
+        secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
+        sameSite: 'strict', // Previene ataques CSRF (opcional)
+        httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
+      };
+      res.cookie('jwtToken', token, cookieOptions);
+      res.json({
+        payload: {
+          username,
+          uid: user._id,
+          reputation: user.reputation,
+        },
+        ok: true,
+        message: "login successful",
       });
     }
-    req.session.user = {
-      _id: user._id,
-      username: user.username,
-      reputation: user.reputation,
-    };
-    const token = await generateToken(user.id, user.username);
-    const username = user.username;
-
-    const cookieOptions = {
-      maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
-      secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
-      sameSite: 'strict', // Previene ataques CSRF (opcional)
-      httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
-    };
-
-    // Enviar JWT token como una cookie HTTPOnly
-    res.cookie('jwtToken', token, cookieOptions);
-    res.json({
-      payload: {
-        username,
-        uid: user._id,
-        reputation: user.reputation,
-      },
-      ok: true,
-      msg: "login successful",
-    });
   } catch (error) {
     console.log(error)
       res.status(500).json({
