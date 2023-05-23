@@ -3,7 +3,7 @@ const { Schema, model } = require("mongoose");
 const UserSchema = new Schema({
   username: {
     type: String,
-    required: true,
+    sparse:true,
     unique: true,
   },
   email: {
@@ -38,6 +38,15 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  usernameIsSet:{
+    type: Boolean,
+    default: true,
+  },
+  picture:{
+    type:String,
+    default:null
+  }
+
 });
 
 UserSchema.methods.toJSON = function () {

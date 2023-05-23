@@ -10,16 +10,16 @@ const { questionValidationSchema } = require("../schemas/question");
 const { validateQuestion } = require("../middlewares/questionValidator");
 const { validarJWT } = require("../middlewares/validateToken");
 const { validateHcaptcha } = require("../middlewares/validateCaptcha");
+const {forumLimiter} = require("../middlewares/rateLimiter");
 
 const router = Router();
 
 router.post(
   "/create",
-  [validarJWT, validateHcaptcha, validateQuestion(questionValidationSchema)],
+  [forumLimiter ,validarJWT, validateHcaptcha, validateQuestion(questionValidationSchema)],
   createQuestion
 );
-router.get("/public", getAllQuestionsPublic);
-router.get("/", validarJWT, getAllQuestions);
+router.post("/", getAllQuestions);
 router.patch("/vote", validarJWT, voteQuestion);
 router.delete("/:uid", validarJWT, deleteQuestion);
 

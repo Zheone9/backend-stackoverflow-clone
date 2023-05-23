@@ -63,27 +63,28 @@ const createUser = async (req, res = response) => {
 const loginWithGoogle = async (req, res = response) => {
   const { id_token, clientId } = req.body;
   try {
-    const payload = await verifyGoogleIdToken(id_token, clientId);
-    const googleUser = payload;
+    const googleUser = await verifyGoogleIdToken(id_token, clientId);
 
     // Verificar si el usuario ya existe en la base de datos
     let user = await User.findOne({ email: googleUser.email });
+    let token;
     if (!user) {
       // Crear un nuevo usuario en la base de datos si no existe
       user = new User({
-        username: googleUser.name,
         email: googleUser.email,
         isGoogleUser: true,
+        usernameIsSet:false,
+        picture:googleUser.picture,
       });
+
       await user.save();
+      token = await generateToken(user.id, null); // Aquí el nombre de usuario será `null`
     } else {
-      // Actualizar la información del usuario si ya existe
-      user.username = googleUser.name;
-      // otros campos de usuario
+      user.picture=googleUser.picture;
       await user.save();
+      token = await generateToken(user.id, user.username);
     }
 
-    const token = await generateToken(user.id, user.username);
     // Enviar el token JWT al cliente
     const cookieOptions = {
       maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
@@ -104,6 +105,7 @@ const loginWithGoogle = async (req, res = response) => {
         username: user.username,
         uid: user._id,
         reputation: user.reputation,
+        picture:user.picture
       },
       ok: true,
       msg: "login successful",
@@ -139,8 +141,7 @@ const loginUser = async (req, res = response) => {
         sameSite: 'strict', // Previene ataques CSRF (opcional)
         httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
       };
-      res.cookie('jwtToken', token, cookieOptions);
-      res.json({
+      res.cookie('jwtToken', token, cookieOptions).json({
         payload: {
           username,
           uid: user._id,
@@ -149,6 +150,7 @@ const loginUser = async (req, res = response) => {
         ok: true,
         message: "login successful",
       });
+
     }
   } catch (error) {
     console.log(error)

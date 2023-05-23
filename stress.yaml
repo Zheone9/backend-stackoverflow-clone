@@ -1,0 +1,13 @@
+config:
+  target: "http://localhost:8000/api/auth"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+  http:
+    headers:
+      User-Agent: "Artillery"
+scenarios:
+  - name: "Prueba de carga"
+    flow:
+      - get:
+          url: "/api/users"

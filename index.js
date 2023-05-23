@@ -32,8 +32,11 @@ expressApp.use(cookieParser());
 
 expressApp.use("/api/auth", require("./routes/auth"));
 expressApp.use("/api/questions", require("./routes/questions"));
+expressApp.use("/api/account", require("./routes/account"));
 //Middleware para agregar headers de Control de Acceso HTTP
 
 expressApp.listen(process.env.PORT, () => {
   console.log("servidor corriendo en puerto " + process.env.PORT);
 });
+
+module.exports=expressApp

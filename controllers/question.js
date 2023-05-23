@@ -6,16 +6,16 @@ const getAllQuestions = async (req, res) => {
   try {
     const questions = await Question.find().populate(
       "author",
-      "reputation username"
+      "reputation username picture",
     );
-
+    console.log("id del usuario:",req.body.userId)
     const modifiedQuestions = questions.map((question) => {
       // Convierte el objeto Mongoose a un objeto JSON
       const questionJSON = question.toObject();
 
       // Busca si tu _id está presente en el array voters
       const voter = questionJSON.voters.find(
-        (voter) => voter._id.toString() === req.uid
+        (voter) => voter._id.toString() === req.body.userId
       );
 
       // Si se encuentra el _id en el array voters, agrega la propiedad voted al objeto de la pregunta
@@ -38,24 +38,13 @@ const getAllQuestions = async (req, res) => {
 
     // Envía la respuesta JSON modificada
 
-    return res.status(200).json({ modifiedQuestions });
+    return res.status(200).json({ questions:modifiedQuestions });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error al obtener las preguntas", error });
   }
 };
 
-const getAllQuestionsPublic = async (req, res) => {
-  try {
-    const questions = await Question.find()
-      .populate("author", "reputation username -_id")
-      .select("-voters");
-
-    return res.status(200).json({ questions });
-  } catch (error) {
-    res.status(500).json({ message: "Error al obtener las preguntas" });
-  }
-};
 
 const voteQuestion = async (req, res) => {
   try {
@@ -164,6 +153,5 @@ module.exports = {
   createQuestion,
   getAllQuestions,
   voteQuestion,
-  getAllQuestionsPublic,
   deleteQuestion,
 };
