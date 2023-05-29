@@ -5,7 +5,7 @@ const {
   getAllQuestions,
   getAllQuestionsPublic,
   deleteQuestion,
-} = require("../controllers/question");
+} = require("../controllers/questionController");
 const { questionValidationSchema } = require("../schemas/question");
 const { validateQuestion } = require("../middlewares/questionValidator");
 const { validarJWT } = require("../middlewares/validateToken");
