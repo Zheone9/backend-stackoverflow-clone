@@ -15,10 +15,18 @@ const loginUser = async ({ username, password }) => {
         return { status: 400, response: { ok: false, message: 'Contraseña incorrecta' } };
     }
 
-    const token = await generateToken(user.id, user.username);
+    const token = await generateToken(user._id, user.username);
+
+    const cookieOptions = {
+        maxAge: 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        httpOnly: true,
+    };
 
     return {
         status: 200,
+        cookieOptions,
         response: {
             ok: true,
             payload: {
@@ -53,9 +61,16 @@ const loginWithGoogle = async ({ id_token, clientId }) => {
     }
 
     const token = await generateToken(user.id, null);
-
+    const cookieOptions = {
+        maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
+        secure: process.env.NODE_ENV === 'production', // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
+        sameSite: 'strict', // Previene ataques CSRF (opcional)
+        httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
+    };
     return {
         status: 200,
+        cookieOptions,
+        token,
         response: {
             ok: true,
             payload: {

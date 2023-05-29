@@ -3,7 +3,13 @@ const authService = require('../services/authService');
 const loginUser = async (req, res) => {
   try {
     const result = await authService.loginUser(req.body);
-    res.status(result.status).json(result.response);
+    const token = result.token;
+    const cookieOptions = result.cookieOptions;
+
+    res.cookie("jwtToken",token,cookieOptions)
+        .status(result.status)
+        .json(result.response);
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ ok: false, message: 'Por favor hable con el administrador' });
@@ -24,7 +30,11 @@ const renewToken = async (req, res) => {
 const loginWithGoogle = async (req, res) => {
   try {
     const result = await authService.loginWithGoogle(req.body);
-    res.status(result.status).json(result.response);
+    // Enviar el token JWT al cliente
+    const token = result.token;
+    const cookieOptions = result.cookieOptions;
+    res.cookie("jwtToken",token,cookieOptions)
+        .status(result.status).json(result.response);
   } catch (error) {
     console.log(error);
     res.status(500).json({ ok: false, message: 'Por favor hable con el administrador' });
