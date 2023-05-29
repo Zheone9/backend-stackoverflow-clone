@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { validarJWT } = require("../middlewares/validateToken");
 const {validateUsername} = require("../middlewares/accountChanges");
-const {changeUsername, setUsername} = require("../controllers/account");
+const {changeUsername, setUsername} = require("../controllers/userController");
 const {usernameSchema} = require("../schemas/account");
 const {validarJWTSetUsername} = require("../middlewares/validateJWTSetUsername");
 

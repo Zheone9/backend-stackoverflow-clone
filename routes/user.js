@@ -1,10 +1,10 @@
 const { Router } = require("express");
 const {
-  createUser,
   loginUser,
   renewToken,
   loginWithGoogle, logout,
-} = require("../controllers/auth");
+} = require("../controllers/authController");
+const {createUser} = require("../controllers/userController");
 const { validateUser } = require("../middlewares/userValidator");
 const { validarJWT } = require("../middlewares/validateToken");
 const { userValidationSchema } = require("../schemas/auth");

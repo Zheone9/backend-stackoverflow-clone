@@ -30,7 +30,7 @@ expressApp.use(express.static("public"));
 expressApp.use(express.json());
 expressApp.use(cookieParser());
 
-expressApp.use("/api/auth", require("./routes/auth"));
+expressApp.use("/api/auth", require("./routes/user"));
 expressApp.use("/api/questions", require("./routes/questions"));
 expressApp.use("/api/account", require("./routes/account"));
 //Middleware para agregar headers de Control de Acceso HTTP
