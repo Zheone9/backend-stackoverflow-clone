@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-
 const questionSchema = new Schema({
   title: {
     type: String,
@@ -34,6 +33,23 @@ const questionSchema = new Schema({
       },
     },
   ],
+  comments: [
+    {
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+      body: {
+        type: String,
+        required: true,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -48,4 +64,5 @@ questionSchema.methods.toJSON = function () {
   question.uid = _id;
   return question;
 };
+
 module.exports = model("Question", questionSchema);

@@ -1,57 +1,103 @@
-const userService = require('../services/userService');
-const authService = require("../services/authService")
+const userService = require("../services/userService");
+
 const changeUsername = async (req, res) => {
-    try {
-        const { username } = req;
-        const { newUsername } = req.body;
+  try {
+    const { username } = req;
+    const { newUsername } = req.body;
 
-        const result = await userService.changeUsername(req.uid, username, newUsername);
+    const result = await userService.changeUsername(
+      req.uid,
+      username,
+      newUsername
+    );
 
-        if (!result.success) {
-            return res.status(400).json({ message: result.message });
-        }
-
-        const token = result.token;
-        const cookieOptions = result.cookieOptions;
-
-        return res.cookie("jwtToken", token, cookieOptions).status(200).json({ message: "El nombre de usuario se ha actualizado con éxito" });
-
-    } catch (e) {
-        console.log(e.message);
-        res.status(500).json({ message: "Error al actualizar el nombre de usuario" });
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
     }
+
+    const token = result.token;
+    const cookieOptions = result.cookieOptions;
+
+    return res
+      .cookie("jwtToken", token, cookieOptions)
+      .status(200)
+      .json({ message: "El nombre de usuario se ha actualizado con éxito" });
+  } catch (e) {
+    console.log(e.message);
+    res
+      .status(500)
+      .json({ message: "Error al actualizar el nombre de usuario" });
+  }
 };
 const createUser = async (req, res) => {
-    try {
-        const result = await userService.createUser(req.body);
-        res.status(result.status).json(result.response);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ok: false, message: 'Por favor hable con el administrador'});
+  try {
+    const result = await userService.createUser(req.body);
+    res.status(result.status).json(result.response);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ ok: false, message: "Por favor hable con el administrador" });
+  }
+};
+const setUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    const result = await userService.setUsername(req.uid, username);
+
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
     }
-}
-    const setUsername = async (req, res) => {
-        try {
-            const {username} = req.body;
 
-            const result = await userService.setUsername(req.uid, username);
+    const token = result.token;
+    const cookieOptions = result.cookieOptions;
 
-            if (!result.success) {
-                return res.status(400).json({message: result.message});
-            }
+    return res
+      .cookie("jwtToken", token, cookieOptions)
+      .status(200)
+      .json({ message: "El nombre de usuario se ha actualizado con éxito" });
+  } catch (e) {
+    res
+      .status(500)
+      .json({ message: "Error al actualizar el nombre de usuario" });
+  }
+};
 
-            const token = result.token;
-            const cookieOptions = result.cookieOptions;
+const uploadImage = async (req, res) => {
+  if (req.file) {
+    try {
+      const { uid } = req;
+      const updatedUser = await userService.updateUserPhotoUrl(
+        uid,
+        req.file.path
+      );
 
-            return res.cookie("jwtToken", token, cookieOptions).status(200).json({message: "El nombre de usuario se ha actualizado con éxito"});
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
 
-        } catch (e) {
-            res.status(500).json({message: "Error al actualizar el nombre de usuario"});
-        }
-    };
+      res.status(200).json({
+        payload: {
+          picture: updatedUser.picture,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error al actualizar el URL de la foto",
+        error: error,
+      });
+    }
+  } else {
+    res.status(400).json({
+      message: "Error: Solo se permiten imágenes en formato PNG o JPG",
+    });
+  }
+};
 
 module.exports = {
-    setUsername,
-    changeUsername,
-    createUser
+  setUsername,
+  changeUsername,
+  createUser,
+  uploadImage,
 };
