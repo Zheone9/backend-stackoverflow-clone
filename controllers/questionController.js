@@ -1,4 +1,4 @@
-const questionService = require('../services/questionService');
+const questionService = require("../services/questionService");
 
 const getAllQuestions = async (req, res) => {
   try {
@@ -30,6 +30,25 @@ const voteQuestion = async (req, res) => {
   }
 };
 
+const addComment = async (req, res) => {
+  try {
+    const { body, entryId } = req.body;
+    const authorId = req.uid;
+    const { success, comment } = await questionService.addComment(
+      entryId,
+      body,
+      authorId
+    );
+    if (success) {
+      res.status(200).json({ ok: true, comment });
+    } else {
+      res.status(400).json({ message: "error al agregar el comentario" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "error al agregar el comentario" });
+  }
+};
+
 const deleteQuestion = async (req, res) => {
   try {
     const { uid } = req.params;
@@ -58,7 +77,11 @@ const createQuestion = async (req, res) => {
     const { title, body } = req.body;
     const author = req.uid;
 
-    const newQuestion = await questionService.createQuestion(title, body, author);
+    const newQuestion = await questionService.createQuestion(
+      title,
+      body,
+      author
+    );
 
     res.status(201).json(newQuestion);
   } catch (err) {
@@ -71,4 +94,5 @@ module.exports = {
   getAllQuestions,
   voteQuestion,
   deleteQuestion,
+  addComment,
 };

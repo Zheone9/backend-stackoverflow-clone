@@ -1,6 +1,5 @@
 const validateUsername=(schema)=>async(req,res,next)=>{
     try {
-
         await schema.parseAsync(req.body.newUsername || req.body.username);
         return next();
     }catch (error) {
