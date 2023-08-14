@@ -5,6 +5,45 @@ const bcrypt = require("bcryptjs");
 const getUserInfo = async (username) => {
   return await userRepository.findByUsername(username);
 };
+const removeFriend = async (uid, friendUsername) => {
+  const user = await userRepository.findById(uid);
+  if (!user) {
+    return { success: false, message: "El usuario no existe." };
+  }
+  const friend = await userRepository.findByUsername(friendUsername);
+  if (!friend) {
+    return { success: false, message: "El usuario no existe." };
+  }
+  await userRepository.removeFriend(uid, friend._id);
+};
+
+const declineFriendRequest = async (uid, friendUsername) => {
+  const user = await userRepository.findById(uid);
+  if (!user) {
+    return { success: false, message: "El usuario no existe." };
+  }
+  const friend = await userRepository.findByUsername(friendUsername);
+  if (!friend) {
+    return { success: false, message: "El usuario no existe." };
+  }
+  await userRepository.declineFriendRequest(uid, friend._id);
+
+  return { success: true, message: "Solicitud de amistad aceptada." };
+};
+const acceptFriendRequest = async (uid, friendUsername) => {
+  const user = await userRepository.findById(uid);
+  if (!user) {
+    return { success: false, message: "El usuario no existe." };
+  }
+  const friend = await userRepository.findByUsername(friendUsername);
+  if (!friend) {
+    return { success: false, message: "El usuario no existe." };
+  }
+
+  await userRepository.acceptFriendRequest(uid, friend._id);
+
+  return { success: true, message: "Solicitud de amistad aceptada." };
+};
 
 const changeUsername = async (uid, oldUsername, newUsername) => {
   const user = await userRepository.findByUsername(newUsername);
@@ -24,6 +63,31 @@ const changeUsername = async (uid, oldUsername, newUsername) => {
   };
 
   return { success: true, token, cookieOptions };
+};
+const sentFriendRequest = async (uid, friendUsername) => {
+  const user = await userRepository.findById(uid);
+  if (!user) {
+    return { success: false, message: "El usuario no existe." };
+  }
+  const friend = await userRepository.findByUsername(friendUsername);
+  if (!friend) {
+    return { success: false, message: "El usuario no existe." };
+  }
+
+  if (user.friendRequestsSent.includes(friend._id)) {
+    return {
+      success: false,
+      message: "Ya has enviado una solicitud de amistad a este usuario.",
+    };
+  }
+  if (user._id.equals(friend._id)) {
+    return {
+      success: false,
+      message: "No puedes enviarte una solicitud de amistad a ti mismo.",
+    };
+  }
+  await userRepository.sentFriendRequest(uid, friend._id);
+  return { success: true, message: "Solicitud de amistad enviada." };
 };
 
 const setUsername = async (uid, username) => {
@@ -103,4 +167,8 @@ module.exports = {
   createUser,
   updateUserPhotoUrl,
   getUserInfo,
+  sentFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  removeFriend,
 };

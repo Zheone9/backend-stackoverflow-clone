@@ -118,10 +118,97 @@ const uploadImage = async (req, res) => {
   }
 };
 
+const sentFriendRequest = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, message } = await userService.sentFriendRequest(
+      uid,
+      friendUsername
+    );
+    if (!success) {
+      return res.status(400).json({ message });
+    } else {
+      return res.status(200).json({ message });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al enviar la solicitud de amistad",
+      error: error.message,
+    });
+  }
+};
+
+const acceptFriendRequest = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, message } = await userService.acceptFriendRequest(
+      uid,
+      friendUsername
+    );
+    if (!success) {
+      return res.status(400).json({ message });
+    } else {
+      return res.status(200).json({ message });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al aceptar la solicitud de amistad",
+      error: error.message,
+    });
+  }
+};
+const declineFriendRequest = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, message } = await userService.declineFriendRequest(
+      uid,
+      friendUsername
+    );
+    if (!success) {
+      return res.status(400).json({ message });
+    } else {
+      return res.status(200).json({ message });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al rechazar la solicitud de amistad",
+      error: error.message,
+    });
+  }
+};
+
+const removeFriend = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, message } = await userService.removeFriend(
+      uid,
+      friendUsername
+    );
+    if (!success) {
+      return res.status(400).json({ message });
+    } else {
+      return res.status(200).json({ message });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al eliminar la amistad",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   setUsername,
   changeUsername,
   createUser,
   uploadImage,
   getUserInfo,
+  sentFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  removeFriend,
 };
