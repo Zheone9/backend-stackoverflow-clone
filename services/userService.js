@@ -2,6 +2,10 @@ const userRepository = require("../repositories/userRepository");
 const { generateToken } = require("../helpers/jwt");
 const bcrypt = require("bcryptjs");
 
+const getUserInfo = async (username) => {
+  return await userRepository.findByUsername(username);
+};
+
 const changeUsername = async (uid, oldUsername, newUsername) => {
   const user = await userRepository.findByUsername(newUsername);
 
@@ -98,4 +102,5 @@ module.exports = {
   setUsername,
   createUser,
   updateUserPhotoUrl,
+  getUserInfo,
 };

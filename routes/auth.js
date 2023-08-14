@@ -5,7 +5,11 @@ const {
   loginWithGoogle,
   logout,
 } = require("../controllers/authController");
-const { createUser, uploadImage } = require("../controllers/userController");
+const {
+  createUser,
+  uploadImage,
+  getUserInfo,
+} = require("../controllers/userController");
 const { validateUser } = require("../middlewares/userValidator");
 const { validarJWT } = require("../middlewares/validateToken");
 const { userValidationSchema } = require("../schemas/auth");
@@ -30,5 +34,6 @@ router.post(
 router.get("/renew", validarJWT, renewToken);
 router.post("/google", loginWithGoogle);
 router.post("/logout", logoutLimiter, logout);
+
 
 module.exports = router;

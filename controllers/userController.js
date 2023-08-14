@@ -63,6 +63,29 @@ const setUsername = async (req, res) => {
       .json({ message: "Error al actualizar el nombre de usuario" });
   }
 };
+const getUserInfo = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await userService.getUserInfo(username);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({
+      payload: {
+        username: user.username,
+        picture: user.picture,
+        reputation: user.reputation,
+        joinDate: user.joinDate,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error al obtener la información del usuario" });
+  }
+};
 
 const uploadImage = async (req, res) => {
   if (req.file) {
@@ -100,4 +123,5 @@ module.exports = {
   changeUsername,
   createUser,
   uploadImage,
+  getUserInfo,
 };
