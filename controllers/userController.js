@@ -179,6 +179,24 @@ const declineFriendRequest = async (req, res) => {
     });
   }
 };
+const updateOpenedFriendRequests = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { success, message } = await userService.updateOpenedFriendRequests(
+      uid
+    );
+    if (!success) {
+      return res.status(400).json({ message });
+    } else {
+      return res.status(200).json({ message });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar las notificaciones de amistad",
+      error: error.message,
+    });
+  }
+};
 
 const removeFriend = async (req, res) => {
   try {
@@ -201,6 +219,73 @@ const removeFriend = async (req, res) => {
   }
 };
 
+const getFriendRequests = async (req, res) => {
+  try {
+    const { uid } = req;
+    const friendRequests = await userService.getFriendRequests(uid);
+    res.status(200).json({ friendRequests });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener las solicitudes de amistad",
+      error: error.message,
+    });
+  }
+};
+
+const getIsFriend = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, isFriend } = await userService.getIsFriend(
+      uid,
+      friendUsername
+    );
+    res.status(200).json({ isFriend });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener la información de amistad",
+      error: error.message,
+    });
+  }
+};
+const cancelFriendRequest = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, message } = await userService.cancelFriendRequest(
+      uid,
+      friendUsername
+    );
+    if (!success) {
+      return res.status(400).json({ message });
+    } else {
+      return res.status(200).json({ message });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al cancelar la solicitud de amistad",
+      error: error.message,
+    });
+  }
+};
+
+const checkFriendRequest = async (req, res) => {
+  try {
+    const { uid } = req;
+    const { username: friendUsername } = req.params;
+    const { success, friendRequestSent } = await userService.checkFriendRequest(
+      uid,
+      friendUsername
+    );
+    res.status(200).json({ friendRequestSent });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener la información de amistad",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   setUsername,
   changeUsername,
@@ -211,4 +296,9 @@ module.exports = {
   acceptFriendRequest,
   declineFriendRequest,
   removeFriend,
+  getFriendRequests,
+  getIsFriend,
+  checkFriendRequest,
+  cancelFriendRequest,
+  updateOpenedFriendRequests,
 };

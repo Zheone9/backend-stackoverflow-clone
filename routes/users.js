@@ -5,13 +5,18 @@ const {
   acceptFriendRequest,
   declineFriendRequest,
   removeFriend,
+  getFriendRequests,
+  getIsFriend,
+  checkFriendRequest,
+  cancelFriendRequest,
+  updateOpenedFriendRequests,
 } = require("../controllers/userController");
 const { validarJWT } = require("../middlewares/validateToken");
 
 const router = Router();
 
-router.get("/:username", getUserInfo);
-router.post("/sent-friend-request/:username", validarJWT, sentFriendRequest);
+router.get("/get-user/:username", getUserInfo);
+router.post("/send-friend-request/:username", validarJWT, sentFriendRequest);
 router.post(
   "/accept-friend-request/:username",
   validarJWT,
@@ -22,6 +27,15 @@ router.post(
   validarJWT,
   declineFriendRequest
 );
-router.post("/remove-friend/:username", validarJWT, removeFriend);
+router.delete("/remove-friend/:username", validarJWT, removeFriend);
+router.get("/get-friend-requests", validarJWT, getFriendRequests);
+router.get("/is-friend/:username/", validarJWT, getIsFriend);
+router.get("/check-friend-request/:username", validarJWT, checkFriendRequest);
+router.delete(
+  "/cancel-friend-request/:username",
+  validarJWT,
+  cancelFriendRequest
+);
+router.post("/open-friend-requests", validarJWT, updateOpenedFriendRequests);
 
 module.exports = router;

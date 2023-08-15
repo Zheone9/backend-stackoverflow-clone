@@ -46,6 +46,10 @@ const UserSchema = new Schema({
     type: String,
     default: null,
   },
+  openedFriendRequests: {
+    type: Boolean,
+    default: false,
+  },
   friends: [
     {
       type: Schema.Types.ObjectId,

@@ -3,6 +3,33 @@ const User = require("../models/User");
 const findByUsername = (username) => {
   return User.findOne({ username });
 };
+const updateOpenedFriendRequests = (uid) => {
+  return User.findByIdAndUpdate(
+    uid,
+    { openedFriendRequests: true },
+    { new: true }
+  );
+};
+
+const findFriendRequests = (uid) => {
+  console.log("first");
+  return User.findById(uid)
+    .populate("friendRequestsReceived", "username picture")
+    .select("friendRequestsReceived openedFriendRequests");
+};
+const cancelFriendRequest = async (uid, friendId) => {
+  await User.findByIdAndUpdate(
+    uid,
+    { $pull: { friendRequestsSent: friendId } },
+    { new: true }
+  );
+  await User.findByIdAndUpdate(
+    friendId,
+    { $pull: { friendRequestsReceived: uid } },
+    { new: true }
+  );
+};
+
 const removeFriend = async (uid, friendId) => {
   await User.findByIdAndUpdate(
     uid,
@@ -59,7 +86,10 @@ const sentFriendRequest = async (uid, friendId) => {
   );
   await User.findByIdAndUpdate(
     friendId,
-    { $push: { friendRequestsReceived: uid } },
+    {
+      $push: { friendRequestsReceived: uid },
+      $set: { openedFriendRequests: false },
+    },
     { new: true }
   );
 };
@@ -106,4 +136,7 @@ module.exports = {
   acceptFriendRequest,
   declineFriendRequest,
   removeFriend,
+  findFriendRequests,
+  cancelFriendRequest,
+  updateOpenedFriendRequests,
 };
