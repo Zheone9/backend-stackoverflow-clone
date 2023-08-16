@@ -5,6 +5,10 @@ const bcrypt = require("bcryptjs");
 const getUserInfo = async (username) => {
   return await userRepository.findByUsername(username);
 };
+const getFriendList = async (uid) => {
+  return await userRepository.findFriendList(uid);
+};
+
 const updateOpenedFriendRequests = async (uid) => {
   const user = await userRepository.findById(uid);
   if (!user) {
@@ -94,6 +98,7 @@ const declineFriendRequest = async (uid, friendUsername) => {
 
   return { success: true, message: "Solicitud de amistad aceptada." };
 };
+
 const acceptFriendRequest = async (uid, friendUsername) => {
   const user = await userRepository.findById(uid);
   if (!user) {
@@ -240,4 +245,5 @@ module.exports = {
   checkFriendRequest,
   cancelFriendRequest,
   updateOpenedFriendRequests,
+  getFriendList,
 };

@@ -86,6 +86,18 @@ const getUserInfo = async (req, res) => {
       .json({ message: "Error al obtener la información del usuario" });
   }
 };
+const getFriendList = async (req, res) => {
+  try {
+    const { uid } = req;
+    const friendList = await userService.getFriendList(uid);
+    res.status(200).json({ friendList });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener la lista de amigos",
+      error: error.message,
+    });
+  }
+};
 
 const uploadImage = async (req, res) => {
   if (req.file) {
@@ -301,4 +313,5 @@ module.exports = {
   checkFriendRequest,
   cancelFriendRequest,
   updateOpenedFriendRequests,
+  getFriendList,
 };

@@ -10,6 +10,7 @@ const {
   checkFriendRequest,
   cancelFriendRequest,
   updateOpenedFriendRequests,
+  getFriendList,
 } = require("../controllers/userController");
 const { validarJWT } = require("../middlewares/validateToken");
 
@@ -37,5 +38,6 @@ router.delete(
   cancelFriendRequest
 );
 router.post("/open-friend-requests", validarJWT, updateOpenedFriendRequests);
+router.get("/get-friendList", validarJWT, getFriendList);
 
 module.exports = router;

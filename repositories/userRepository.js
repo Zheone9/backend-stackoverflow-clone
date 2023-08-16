@@ -3,6 +3,14 @@ const User = require("../models/User");
 const findByUsername = (username) => {
   return User.findOne({ username });
 };
+const findFriendList = async (uid) => {
+  const userWithFriends = await User.findById(uid).populate(
+    "friends",
+    "username picture"
+  );
+  return userWithFriends.friends; // Esto devolverá un array de amigos con sus datos
+};
+
 const updateOpenedFriendRequests = (uid) => {
   return User.findByIdAndUpdate(
     uid,
@@ -139,4 +147,5 @@ module.exports = {
   findFriendRequests,
   cancelFriendRequest,
   updateOpenedFriendRequests,
+  findFriendList,
 };
