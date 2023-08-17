@@ -23,7 +23,6 @@ const changeUsername = async (req, res) => {
       .status(200)
       .json({ message: "El nombre de usuario se ha actualizado con éxito" });
   } catch (e) {
-    console.log(e.message);
     res
       .status(500)
       .json({ message: "Error al actualizar el nombre de usuario" });

@@ -34,6 +34,12 @@ const cancelFriendRequest = async (uid, friendUsername) => {
   if (!friend) {
     return { success: false, message: "El usuario no existe." };
   }
+  if (!user.friendRequestsSent.includes(friend._id)) {
+    return {
+      success: false,
+      message: "No has enviado ninguna solicitud de amistad a este usuario.",
+    };
+  }
 
   await userRepository.cancelFriendRequest(uid, friend._id);
   return { success: true, message: "Solicitud de amistad cancelada." };
@@ -81,6 +87,11 @@ const removeFriend = async (uid, friendUsername) => {
   if (!friend) {
     return { success: false, message: "El usuario no existe." };
   }
+
+  if (!user.friends.includes(friend._id)) {
+    return { success: false, message: "No eres amigo de este usuario." };
+  }
+
   await userRepository.removeFriend(uid, friend._id);
   return { success: true, message: "Amigo eliminado." };
 };
@@ -94,6 +105,13 @@ const declineFriendRequest = async (uid, friendUsername) => {
   if (!friend) {
     return { success: false, message: "El usuario no existe." };
   }
+  if (!user.friendRequestsReceived.includes(friend._id)) {
+    return {
+      success: false,
+      message: "No tienes ninguna solicitud de amistad de este usuario.",
+    };
+  }
+
   await userRepository.declineFriendRequest(uid, friend._id);
 
   return { success: true, message: "Solicitud de amistad aceptada." };
@@ -107,6 +125,12 @@ const acceptFriendRequest = async (uid, friendUsername) => {
   const friend = await userRepository.findByUsername(friendUsername);
   if (!friend) {
     return { success: false, message: "El usuario no existe." };
+  }
+  if (!user.friendRequestsReceived.includes(friend._id)) {
+    return {
+      success: false,
+      message: "No tienes ninguna solicitud de amistad de este usuario.",
+    };
   }
 
   await userRepository.acceptFriendRequest(uid, friend._id);

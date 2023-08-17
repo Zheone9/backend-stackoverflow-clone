@@ -30,6 +30,7 @@ const loginUser = async ({ username, password }) => {
     httpOnly: true,
   };
 
+  const friendList = await userRepository.findFriendList(user._id);
   return {
     status: 200,
     cookieOptions,
@@ -40,6 +41,7 @@ const loginUser = async ({ username, password }) => {
         uid: user._id,
         reputation: user.reputation,
         picture: user.picture,
+        friendList,
       },
       token,
     },
@@ -79,6 +81,8 @@ const loginWithGoogle = async ({ id_token, clientId }) => {
     sameSite: "strict", // Previene ataques CSRF (opcional)
     httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
   };
+  const friendList = await userRepository.findFriendList(user._id);
+
   return {
     status: 200,
     cookieOptions,
@@ -90,6 +94,7 @@ const loginWithGoogle = async ({ id_token, clientId }) => {
         reputation: user.reputation,
         username: user.username,
         picture: user.picture,
+        friendList,
       },
       token,
     },
