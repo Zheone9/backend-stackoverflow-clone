@@ -1,6 +1,7 @@
 const userRepository = require("../repositories/userRepository");
 const { generateToken } = require("../helpers/jwt");
 const bcrypt = require("bcryptjs");
+const io = require("../io");
 
 const getUserInfo = async (username) => {
   return await userRepository.findByUsername(username);
@@ -180,6 +181,14 @@ const sentFriendRequest = async (uid, friendUsername) => {
     };
   }
   await userRepository.sentFriendRequest(uid, friend._id);
+  console.log(io);
+
+  io.getIO().emit("friendRequestSent", {
+    _id: friend._id,
+    picture: friend.picture,
+    username: friendUsername,
+  });
+
   return { success: true, message: "Solicitud de amistad enviada." };
 };
 
