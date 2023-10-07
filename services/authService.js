@@ -7,6 +7,7 @@ const {
   accessTokenCookieOptions,
   refreshTokenCookieOptions,
 } = require("../helpers/cookiesSetup");
+const io = require("../io");
 
 const loginUser = async ({ username, password }) => {
   const user = await userRepository.findByUsername(username);

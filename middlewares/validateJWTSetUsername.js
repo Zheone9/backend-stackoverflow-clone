@@ -1,9 +1,6 @@
 const { response } = require("express");
 const jwt = require("jsonwebtoken");
-const {
-  renovarToken,
-  renovarTokenWithUnsettedUsername,
-} = require("../helpers/jwt");
+const { renovarTokenWithUnsettedUsername } = require("../helpers/jwt");
 
 const validarJWTSetUsername = async (req, res = response, next) => {
   const refreshTokenCookie = req.cookies.refreshToken;

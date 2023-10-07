@@ -186,10 +186,11 @@ const sentFriendRequest = async (uid, friendUsername) => {
   }
   await userRepository.sentFriendRequest(uid, friend._id);
 
-  io.getIO().emit("friendRequestSent", {
-    _id: user._id,
-    picture: user.picture,
+  const friendId = friend._id.toString(); // Convierte el ObjectId a una cadena
+  io.getIO().to(friendId).emit("solicitudAmistad", {
+    uid,
     username: user.username,
+    picture: user.picture,
   });
 
   return { success: true, message: "Solicitud de amistad enviada." };
