@@ -16,10 +16,14 @@ const changeUsername = async (req, res) => {
     }
 
     const token = result.token;
+    const refreshToken = result.refreshToken;
+
     const cookieOptions = result.cookieOptions;
+    const refreshCookieOptions = result.refreshTokenCookieOptions;
 
     return res
       .cookie("jwtToken", token, cookieOptions)
+      .cookie("refreshToken", refreshToken, refreshCookieOptions)
       .status(200)
       .json({ message: "El nombre de usuario se ha actualizado con éxito" });
   } catch (e) {
@@ -50,10 +54,13 @@ const setUsername = async (req, res) => {
     }
 
     const token = result.token;
+    const refreshToken = result.refreshToken;
     const cookieOptions = result.cookieOptions;
+    const refreshCookieOptions = result.refreshTokenCookieOptions;
 
     return res
       .cookie("jwtToken", token, cookieOptions)
+      .cookie("refreshToken", refreshToken, refreshCookieOptions)
       .status(200)
       .json({ message: "El nombre de usuario se ha actualizado con éxito" });
   } catch (e) {

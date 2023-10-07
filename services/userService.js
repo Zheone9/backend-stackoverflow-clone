@@ -1,7 +1,11 @@
 const userRepository = require("../repositories/userRepository");
-const { generateToken } = require("../helpers/jwt");
+const { generateToken, generateRefreshToken } = require("../helpers/jwt");
 const bcrypt = require("bcryptjs");
 const io = require("../io");
+const {
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+} = require("../helpers/cookiesSetup");
 
 const getUserInfo = async (username) => {
   return await userRepository.findByUsername(username);
@@ -148,15 +152,15 @@ const changeUsername = async (uid, oldUsername, newUsername) => {
 
   await userRepository.updateUsername(uid, oldUsername, newUsername);
   const token = await generateToken(uid, newUsername);
+  const refreshToken = await generateRefreshToken(uid, newUsername);
 
-  const cookieOptions = {
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    httpOnly: true,
+  return {
+    success: true,
+    token,
+    refreshToken,
+    accessTokenCookieOptions,
+    refreshTokenCookieOptions,
   };
-
-  return { success: true, token, cookieOptions };
 };
 const sentFriendRequest = async (uid, friendUsername) => {
   const user = await userRepository.findById(uid);
@@ -181,12 +185,11 @@ const sentFriendRequest = async (uid, friendUsername) => {
     };
   }
   await userRepository.sentFriendRequest(uid, friend._id);
-  console.log(io);
 
   io.getIO().emit("friendRequestSent", {
-    _id: friend._id,
-    picture: friend.picture,
-    username: friendUsername,
+    _id: user._id,
+    picture: user.picture,
+    username: user.username,
   });
 
   return { success: true, message: "Solicitud de amistad enviada." };
@@ -201,15 +204,15 @@ const setUsername = async (uid, username) => {
 
   await userRepository.updateUsernameById(uid, username);
   const token = await generateToken(uid, username);
+  const refreshToken = await generateRefreshToken(uid, username);
 
-  const cookieOptions = {
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    httpOnly: true,
+  return {
+    success: true,
+    token,
+    refreshToken,
+    accessTokenCookieOptions,
+    refreshTokenCookieOptions,
   };
-
-  return { success: true, token, cookieOptions };
 };
 const updateUserPhotoUrl = async (userId, photoUrl) => {
   return await userRepository.updatePhotoUrl(userId, photoUrl);
@@ -248,6 +251,7 @@ const createUser = async ({ email, password, username }) => {
 
   // Generar token y enviarlo como respuesta
   const token = await generateToken(user.id, user.username);
+  const refreshToken = await generateRefreshToken(user.id, user.username);
   return {
     status: 201,
     response: {
@@ -259,6 +263,7 @@ const createUser = async ({ email, password, username }) => {
       ok: true,
       msg: "user created",
       token,
+      refreshToken,
     },
   };
 };

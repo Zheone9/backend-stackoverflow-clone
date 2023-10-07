@@ -4,7 +4,7 @@ const generateToken = (uid, username) => {
   return new Promise((resolve, reject) => {
     const payload = { uid, username };
     const options = {
-      expiresIn: "1h",
+      expiresIn: "20s",
     };
     jwt.sign(payload, process.env.JWT_SECRET, options, (err, token) => {
       if (err) reject("No se pudo generar el token");
@@ -13,17 +13,69 @@ const generateToken = (uid, username) => {
   });
 };
 
-const renovarToken = (res, decodedToken) => {
-  const newToken = generateToken(decodedToken.uid, decodedToken.username);
-  const cookieOptions = {
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    httpOnly: true,
-  };
-  res.cookie("jwtToken", newToken, cookieOptions);
-}
+const generateRefreshToken = (uid, username) => {
+  return new Promise((resolve, reject) => {
+    const payload = { uid, username };
+    const options = {
+      expiresIn: "7d",
+    };
+    jwt.sign(payload, process.env.JWT_SECRET_REFRESH, options, (err, token) => {
+      if (err) reject("No se pudo generar el token");
+      resolve(token);
+    });
+  });
+};
+
+const renovarToken = (refreshToken) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      refreshToken,
+      process.env.JWT_SECRET_REFRESH,
+      async (err, user) => {
+        if (err) {
+          reject("Invalid refresh token");
+        } else {
+          try {
+            const token = await generateToken(user.uid, user.username);
+            const refreshToken = await generateRefreshToken(
+              user.uid,
+              user.username
+            );
+            resolve({ token, refreshToken });
+          } catch (error) {
+            reject("Could not generate tokens");
+          }
+        }
+      }
+    );
+  });
+};
+
+const renovarTokenWithUnsettedUsername = (refreshToken) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      refreshToken,
+      process.env.JWT_SECRET_REFRESH,
+      async (err, user) => {
+        if (err) {
+          reject("Invalid refresh token");
+        } else {
+          try {
+            const token = await generateToken(user.uid, null);
+            const refreshToken = await generateRefreshToken(user.uid, null);
+            resolve({ token, refreshToken });
+          } catch (error) {
+            reject("Could not generate tokens");
+          }
+        }
+      }
+    );
+  });
+};
 
 module.exports = {
-  generateToken,renovarToken
+  generateToken,
+  generateRefreshToken,
+  renovarToken,
+  renovarTokenWithUnsettedUsername,
 };

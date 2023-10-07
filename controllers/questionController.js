@@ -39,6 +39,8 @@ const addComment = async (req, res) => {
       body,
       authorId
     );
+
+    console.log(success);
     if (success) {
       res.status(200).json({ ok: true, comment });
     } else {

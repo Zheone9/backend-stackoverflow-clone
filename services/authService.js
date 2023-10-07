@@ -1,7 +1,13 @@
 // Importar repositorio y librerías necesarias
 const userRepository = require("../repositories/userRepository");
-const { generateToken } = require("../helpers/jwt");
+const { generateToken, generateRefreshToken } = require("../helpers/jwt");
 const { verifyGoogleIdToken } = require("../helpers/google/validateTokenId");
+const bcrypt = require("bcryptjs");
+const {
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+} = require("../helpers/cookiesSetup");
+
 const loginUser = async ({ username, password }) => {
   const user = await userRepository.findByUsername(username);
 
@@ -22,18 +28,14 @@ const loginUser = async ({ username, password }) => {
   }
 
   const token = await generateToken(user._id, user.username);
-
-  const cookieOptions = {
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    httpOnly: true,
-  };
+  const refreshToken = await generateRefreshToken(user._id, user.username);
 
   const friendList = await userRepository.findFriendList(user._id);
+
   return {
     status: 200,
-    cookieOptions,
+    accessTokenCookieOptions,
+    refreshTokenCookieOptions,
     response: {
       ok: true,
       payload: {
@@ -44,6 +46,7 @@ const loginUser = async ({ username, password }) => {
         friendList,
       },
       token,
+      refreshToken,
     },
   };
 };
@@ -63,6 +66,8 @@ const loginWithGoogle = async ({ id_token, clientId }) => {
 
   let user = await userRepository.findByEmail(googleUser.email);
   let token;
+  let refreshToken;
+
   if (!user) {
     const userData = {
       email: googleUser.email,
@@ -71,22 +76,20 @@ const loginWithGoogle = async ({ id_token, clientId }) => {
     };
     user = await userRepository.create(userData);
     token = await generateToken(user.id, null);
+    refreshToken = await generateRefreshToken(user.id, null);
   } else {
     token = await generateToken(user.id, user.username);
+    refreshToken = await generateRefreshToken(user.id, user.username);
   }
 
-  const cookieOptions = {
-    maxAge: 24 * 60 * 60 * 1000, // Tiempo de expiración en milisegundos
-    secure: process.env.NODE_ENV === "production", // Asegura que la cookie solo se envíe a través de HTTPS (opcional)
-    sameSite: "strict", // Previene ataques CSRF (opcional)
-    httpOnly: true, // Asegura que la cookie solo sea accesible por el servidor, no por JavaScript
-  };
   const friendList = await userRepository.findFriendList(user._id);
 
   return {
     status: 200,
-    cookieOptions,
+    accessTokenCookieOptions,
+    refreshTokenCookieOptions,
     token,
+    refreshToken,
     response: {
       ok: true,
       payload: {
