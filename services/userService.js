@@ -122,23 +122,32 @@ const declineFriendRequest = async (uid, friendUsername) => {
   return { success: true, message: "Solicitud de amistad aceptada." };
 };
 
-const acceptFriendRequest = async (uid, friendUsername) => {
+const acceptFriendRequest = async (uid, friendRequestUsername) => {
   const user = await userRepository.findById(uid);
   if (!user) {
     return { success: false, message: "El usuario no existe." };
   }
-  const friend = await userRepository.findByUsername(friendUsername);
-  if (!friend) {
+  const friendRequest = await userRepository.findByUsername(
+    friendRequestUsername
+  );
+  if (!friendRequest) {
     return { success: false, message: "El usuario no existe." };
   }
-  if (!user.friendRequestsReceived.includes(friend._id)) {
+  if (!user.friendRequestsReceived.includes(friendRequest._id)) {
     return {
       success: false,
       message: "No tienes ninguna solicitud de amistad de este usuario.",
     };
   }
 
-  await userRepository.acceptFriendRequest(uid, friend._id);
+  await userRepository.acceptFriendRequest(uid, friendRequest._id);
+
+  const friendId = friendRequest._id.toString(); // Convierte el ObjectId a una cadena
+  io.getIO().to(friendId).emit("aceptarSolicitudAmistad", {
+    friendId,
+    username: friendRequest.username,
+    picture: friendRequest.picture,
+  });
 
   return { success: true, message: "Solicitud de amistad aceptada." };
 };
@@ -192,6 +201,8 @@ const sentFriendRequest = async (uid, friendUsername) => {
     username: user.username,
     picture: user.picture,
   });
+
+  console.log("Solicitud de amistad enviadaa ", friendId, " desde ", uid);
 
   return { success: true, message: "Solicitud de amistad enviada." };
 };

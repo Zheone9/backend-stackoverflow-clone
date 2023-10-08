@@ -20,7 +20,6 @@ const updateOpenedFriendRequests = (uid) => {
 };
 
 const findFriendRequests = (uid) => {
-  console.log("first");
   return User.findById(uid)
     .populate("friendRequestsReceived", "username picture")
     .select("friendRequestsReceived openedFriendRequests");

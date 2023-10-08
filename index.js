@@ -39,9 +39,8 @@ expressApp.use("/api/account", require("./routes/account"));
 expressApp.use("/api/users", require("./routes/users"));
 
 io.init(server).on("connection", (socket) => {
-  console.log("Auth object:", socket.handshake);
   const userId = socket.handshake.auth.userId;
-
+  if (!userId) return;
   // Unir al usuario a su propia sala basada en su ID
   socket.join(userId);
   console.log("se ha conectado", userId);
