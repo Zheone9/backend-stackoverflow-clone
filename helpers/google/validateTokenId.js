@@ -9,7 +9,6 @@ const verifyGoogleIdToken = async (token, clientId) => {
       audience: clientId,
     });
     const payload = ticket.getPayload();
-    console.log("payload en verify", payload);
     return payload;
   } catch (error) {
     console.error("Error al verificar el token de Google:", error.message);

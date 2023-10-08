@@ -73,9 +73,40 @@ const renovarTokenWithUnsettedUsername = (refreshToken) => {
   });
 };
 
+const verifyAndDecodeToken = async (token, refreshToken) => {
+  let newToken, decoded;
+  if (!token) {
+    try {
+      const result = await renovarToken(refreshToken);
+      newToken = result.token;
+    } catch (error) {
+      throw new Error("Could not refresh the token");
+    }
+    decoded = jwt.decode(newToken);
+    console.log("decoded", decoded);
+  } else {
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        try {
+          const result = await renovarToken(refreshToken);
+          newToken = result.token;
+        } catch (error) {
+          throw new Error("Could not refresh the expired token");
+        }
+        decoded = jwt.decode(newToken);
+      } else {
+        throw err; // re-lanza el error
+      }
+    }
+  }
+  return decoded;
+};
 module.exports = {
   generateToken,
   generateRefreshToken,
   renovarToken,
   renovarTokenWithUnsettedUsername,
+  verifyAndDecodeToken,
 };

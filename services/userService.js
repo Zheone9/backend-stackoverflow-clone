@@ -144,9 +144,9 @@ const acceptFriendRequest = async (uid, friendRequestUsername) => {
 
   const friendId = friendRequest._id.toString(); // Convierte el ObjectId a una cadena
   io.getIO().to(friendId).emit("aceptarSolicitudAmistad", {
-    friendId,
-    username: friendRequest.username,
-    picture: friendRequest.picture,
+    uid,
+    username: user.username,
+    picture: user.picture,
   });
 
   return { success: true, message: "Solicitud de amistad aceptada." };

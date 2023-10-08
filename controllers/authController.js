@@ -1,3 +1,5 @@
+const io = require("../io");
+const { getIO } = require("../io");
 const authService = require("../services/authService");
 
 const loginUser = async (req, res) => {
@@ -42,6 +44,7 @@ const loginWithGoogle = async (req, res) => {
     const refreshToken = result.refreshToken;
     const refreshCookieOptions = result.refreshTokenCookieOptions;
     const tokenCookieOptions = result.accessTokenCookieOptions;
+    console.log("desde login google controller");
 
     res
       .cookie("refreshToken", refreshToken, refreshCookieOptions)
@@ -57,8 +60,11 @@ const loginWithGoogle = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie("jwtToken").clearCookie("refreshToken");
-  res.status(200).json({ ok: true, message: "Sesión cerrada" });
+  res
+    .clearCookie("jwtToken")
+    .clearCookie("refreshToken")
+    .status(200)
+    .json({ ok: true, message: "Sesión cerrada" });
 };
 
 module.exports = {

@@ -7,6 +7,7 @@ const {
   accessTokenCookieOptions,
   refreshTokenCookieOptions,
 } = require("../helpers/cookiesSetup");
+const { getIO } = require("../io");
 const io = require("../io");
 
 const loginUser = async ({ username, password }) => {
@@ -76,15 +77,17 @@ const loginWithGoogle = async ({ id_token, clientId }) => {
       isGoogleUser: true,
     };
     user = await userRepository.create(userData);
+
     token = await generateToken(user.id, null);
     refreshToken = await generateRefreshToken(user.id, null);
   } else {
+    console.log("id", user.id);
     token = await generateToken(user.id, user.username);
     refreshToken = await generateRefreshToken(user.id, user.username);
   }
-
+  const userId = user._id.toString();
+  console.log("desde login google");
   const friendList = await userRepository.findFriendList(user._id);
-
   return {
     status: 200,
     accessTokenCookieOptions,
